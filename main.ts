@@ -35,4 +35,15 @@ const readBack = readFileSync(OUTPUT_PATH, "utf8");
 if (readBack !== ENTRY) {
   fail("read-back mismatch: written file differs from validated text");
 }
+// Byte-level verification: the gate counts characters, the tie-break
+// counts bytes, so the file must be exactly ENTRY's UTF-8 bytes — no
+// trailing newline, no BOM, no encoding surprise. A string comparison
+// alone could mask a byte-level difference; compare buffers instead.
+const expectedBytes = Buffer.from(ENTRY, "utf8");
+const actualBytes = readFileSync(OUTPUT_PATH);
+if (!actualBytes.equals(expectedBytes)) {
+  fail(
+    `byte mismatch: file is ${actualBytes.length} bytes, expected ${expectedBytes.length}`,
+  );
+}
 console.log(`wrote ${ENTRY.length} chars to ${OUTPUT_PATH}`);
